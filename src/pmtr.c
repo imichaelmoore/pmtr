@@ -7,6 +7,8 @@ pmtr_t cfg = {
   .logger_fd = -1,
 };
 
+static struct timespec halfsec = {.tv_sec = 0, .tv_nsec = 500000000};
+
 void usage(char *prog) {
   fprintf(stderr, "usage: %s [options]\n\n", prog);
   fprintf(stderr, " options:\n");
@@ -28,7 +30,7 @@ void sighandler(int signo) {
 
 /* fork a process that signals us if the config or deps change */
 pid_t dep_monitor(char *file) {
-  int rc, fd, wd, sc;
+  int fd, wd, sc;
   pid_t pid;
 
   pid = fork();
@@ -89,7 +91,7 @@ pid_t dep_monitor(char *file) {
   sigprocmask(SIG_UNBLOCK,&hup,NULL);
 
   /* block for any inotify event. when one happens, notify parent */
-  rc = read(fd, &cfg.eb, sizeof(cfg.eb));
+  (void)read(fd, &cfg.eb, sizeof(cfg.eb));
   nanosleep(&halfsec,NULL);
   kill(getppid(), SIGHUP);
   exit(0);
@@ -157,7 +159,7 @@ int setup_logger(void) {
 static char exe[100];
 pid_t id_peer(int fd, char **name) {
   struct ucred ucred;
-  int rc = -1, sc, i;
+  int sc, i;
   socklen_t len;
 
   *exe = '\0';
@@ -194,7 +196,7 @@ pid_t id_peer(int fd, char **name) {
 }
 
 pid_t start_logger(void) {
-  int epoll_fd, fd, rc = -1, sc;
+  int epoll_fd, fd, sc;
   struct epoll_event ev;
   char buf[1000];
   ssize_t nr;
@@ -372,7 +374,7 @@ int make_pidfile() {
   pid = getpid();
   snprintf(pid_str,sizeof(pid_str),"%u\n",(unsigned)pid);
   pid_strlen = strlen(pid_str);
-  if (write(fd,pid_str,pid_strlen) != pid_strlen) {
+  if ((size_t)write(fd,pid_str,pid_strlen) != pid_strlen) {
    syslog(LOG_ERR,"can't write to %s: %s\n",cfg.pidfile, strerror(errno));
    close(fd);
    unlink(cfg.pidfile);
@@ -387,8 +389,8 @@ int make_pidfile() {
 }
 
 int main (int argc, char *argv[]) {
-  int n, opt, log_opt;
-  job_t *job;
+  int opt, log_opt;
+  size_t n;
 
   UT_string *em, *sm;
   utstring_new(em);

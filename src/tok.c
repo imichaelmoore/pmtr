@@ -37,13 +37,11 @@ static const int ws[256] = { ['\r']=1, ['\n']=1, ['\t']=1, [' ']=1 };
 
 int get_tok(char *c_orig, char **c, size_t *bsz, size_t *toksz, int *line) {
   char *e;
-  int leading_nl=0;
 
  again:
   /* skip leading whitespace */
   while(*bsz && ws[(int)**c]) {
-    if (**c=='\n') { 
-      leading_nl=1;
+    if (**c=='\n') {
       (*line)++;
     }
     (*bsz)--; (*c)++;
@@ -60,7 +58,7 @@ int get_tok(char *c_orig, char **c, size_t *bsz, size_t *toksz, int *line) {
   }
 
   /* identify literal keywords */
-  int i;
+  size_t i;
   for(i=0; i < sizeof(kw)/sizeof(*kw); i++) {
     if (*bsz < kw[i].len) continue;
     if (memcmp(*c,kw[i].str,kw[i].len) ) continue;

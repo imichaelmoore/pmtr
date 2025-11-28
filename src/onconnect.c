@@ -128,7 +128,8 @@ int setup_listener() {
 
 /* accept a new client connection to the listening socket */
 int accept_client() {
-  int fd, n, sc, rc = -1;
+  int fd, sc, rc = -1;
+  size_t n;
   pid_t pid;
   struct sockaddr_in in;
   socklen_t sz = sizeof(in);
@@ -241,7 +242,8 @@ int main(int argc, char *argv[]) {
   cfg.prog = argv[0];
   cfg.prog=argv[0];
   cfg.pid = getpid();
-  int n, opt, sc;
+  int opt, sc;
+  size_t n;
   struct epoll_event ev;
 
   while ( (opt=getopt(argc,argv,"vp:a:h")) != -1) {
@@ -258,8 +260,8 @@ int main(int argc, char *argv[]) {
   cfg.subprocess_argv = argv + optind;
   cfg.subprocess_argc = argc - optind;
   if (cfg.verbose) {
-    for(n = 0; n < cfg.subprocess_argc; n++) {
-      fprintf(stderr, "subprocess: argv[%d]: %s\n", n, cfg.subprocess_argv[n]);
+    for(n = 0; n < (size_t)cfg.subprocess_argc; n++) {
+      fprintf(stderr, "subprocess: argv[%zu]: %s\n", n, cfg.subprocess_argv[n]);
     }
   }
 

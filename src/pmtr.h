@@ -35,8 +35,6 @@
 #define DEFAULT_PMTR_CONFIG CFGDIR "/pmtr.conf"
 #define SHORT_DELAY 10
 
-static struct timespec halfsec = {.tv_sec =  0, .tv_nsec = 500000000};
-
 typedef struct {
   char *file;
   char *pidfile;

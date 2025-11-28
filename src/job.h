@@ -19,15 +19,15 @@
 #define PMTR_MAX_USER 100
 
 /* signals that we'll allow (unblock) during sigsuspend */
-static const int sigs[] = {SIGHUP,SIGCHLD,SIGTERM,SIGINT,SIGQUIT,
+static const int sigs[] __attribute__((unused)) = {SIGHUP,SIGCHLD,SIGTERM,SIGINT,SIGQUIT,
                            SIGALRM,SIGUSR1,SIGIO};
 
 #define S(x) #x, x
-static struct rlimit_label { 
+static struct rlimit_label {
  char *flag;
- char *name;  
- int  id; 
-} rlimit_labels[] =  {
+ char *name;
+ int  id;
+} rlimit_labels[] __attribute__((unused)) =  {
               { "-c", S(RLIMIT_CORE)       },
               { "-d", S(RLIMIT_DATA)       },
               { "-e", S(RLIMIT_NICE)       },

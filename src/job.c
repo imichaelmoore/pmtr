@@ -110,9 +110,9 @@ void set_cmd(parse_t *ps, char *cmd) {
  * or as a comma-delimited list of numbers and ranges
  * e.g. 1,3-5,8
  */
-void set_cpu(parse_t *ps, char *cpu_spec) { 
+void set_cpu(parse_t *ps, char *cpu_spec) {
   unsigned cpu, i, in_range, range_start, range_end, ndig;
-  unsigned char *c, d, peek;
+  char *c, d, peek;
   size_t len;
 
   len = strlen(cpu_spec);
@@ -280,7 +280,7 @@ void set_ulimit(parse_t *ps, char *rname, char *value_a) {
     return;
   }
 
-  int i;
+  size_t i;
   for(i=0; i<adim(rlimit_labels); i++) {
     if ( (!strcmp(rname, rlimit_labels[i].flag)) || // accept a flag like -m or 
          (!strcmp(rname, rlimit_labels[i].name))) { // full name like RLIMIT_RSS
@@ -347,8 +347,8 @@ char *fpath(job_t *job, char *file) {
 /* this function reads a whole file into a malloc'd buffer */
 int slurp(char *file, char **text, size_t *len) {
   struct stat s;
-  char *buf;
-  int fd = -1, rc=-1, nr;
+  int fd = -1, rc=-1;
+  ssize_t nr;
   *text=NULL; *len = 0;
 
   if (stat(file, &s) == -1) {
@@ -362,12 +362,12 @@ int slurp(char *file, char **text, size_t *len) {
     goto done;
   }
   if ( (*text = malloc(*len)) == NULL) goto done;
-  if ( (nr=read(fd, *text, *len)) != *len) {
+  if ( (nr=read(fd, *text, *len)) != (ssize_t)*len) {
    if (nr == -1) {
      syslog(LOG_CRIT,"read %s failed: %s", file, strerror(errno));
    } else {
-     syslog(LOG_CRIT,"read %s failed: incomplete (%u/%u)", file, 
-        nr, (unsigned)*len);
+     syslog(LOG_CRIT,"read %s failed: incomplete (%zd/%zu)", file,
+        nr, *len);
    }
    goto done;
   }
@@ -405,7 +405,6 @@ int hash_deps(UT_array *jobs) {
 
   rc=0;
 
- done:
   return rc;
 }
 
@@ -548,7 +547,8 @@ int redirect(pmtr_t *cfg, int fileno, char *filename, int flags, int mode) {
 void do_jobs(pmtr_t *cfg) {
   pid_t pid;
   time_t now, elapsed;
-  int es, n, fo, fe, fi, rc=-1, ds;
+  int es, rc=-1;
+  size_t n;
   char *pathname, *o, *e, *i, **argv, **env;
 
   job_t *job = NULL;

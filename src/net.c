@@ -263,7 +263,7 @@ void close_sockets(pmtr_t *cfg) {
 
 /* report to all configured destinations */
 void report_status(pmtr_t *cfg) {
-  int rc;
+  ssize_t rc;
   time_t now = time(NULL);
 
   /* construct msg */
@@ -283,8 +283,8 @@ void report_status(pmtr_t *cfg) {
     rc = write(*fd,utstring_body(cfg->s),utstring_len(cfg->s));
     if (rc < 0 && errno != ECONNREFUSED) 
       syslog(LOG_INFO,"write error: %s", strerror(errno));
-    if (rc >= 0 && rc < utstring_len(cfg->s)) {
-      syslog(LOG_INFO,"incomplete write %d/%d", rc, utstring_len(cfg->s));
+    if (rc >= 0 && (size_t)rc < utstring_len(cfg->s)) {
+      syslog(LOG_INFO,"incomplete write %zd/%u", rc, utstring_len(cfg->s));
     }
   }
 }
